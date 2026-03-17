@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yapay Zeka ile CV Mühendisliği</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #161b24;
+    --border: rgba(255,255,255,0.07);
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --accent-glow: rgba(59,130,246,0.15);
+    --gold: #f59e0b;
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --text-dim: #9ca3af;
+    --green: #10b981;
+    --red: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(10,12,16,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent2);
+  }
+
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a {
+    font-size: 13px; font-weight: 500;
+    color: var(--text-dim); text-decoration: none;
+    letter-spacing: 0.05em; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  .page {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 48px 80px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* PAGE 1 */
+  #page1 {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+    padding: 120px 48px 80px;
+    max-width: 900px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .cover-orb {
+    position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.2; pointer-events: none; z-index: 0;
+  }
+  .orb1 {
+    width: 700px; height: 700px; top: -200px; right: -150px;
+    background: radial-gradient(circle, #1d4ed8, transparent);
+    animation: float1 9s ease-in-out infinite;
+  }
+  .orb2 {
+    width: 500px; height: 500px; bottom: -150px; left: -100px;
+    background: radial-gradient(circle, #1e3a5f, transparent);
+    animation: float2 11s ease-in-out infinite;
+  }
+
+  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,30px)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-20px)} }
+
+  .cover-content { position: relative; z-index: 1; }
+
+  .cover-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 999px; padding: 6px 16px;
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent2); margin-bottom: 40px;
+    animation: fadeUp 0.8s ease both;
+  }
+  .cover-tag::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent2); animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .cover-title {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(38px, 7vw, 70px);
+    line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 24px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+  .cover-title .gradient-line {
+    display: block;
+    background: linear-gradient(90deg, var(--accent2) 0%, #a78bfa 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .cover-subtitle {
+    font-size: 18px; font-weight: 300; color: var(--text-dim);
+    max-width: 520px; margin-bottom: 56px; line-height: 1.6;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .cover-subtitle em { font-style: italic; color: var(--text); font-weight: 400; }
+
+  .cover-stats {
+    display: flex; gap: 48px; margin-bottom: 60px;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 36px;
+    color: var(--accent2); line-height: 1; margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--text-muted);
+  }
+
+  .cover-cta {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--accent); color: #fff;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;
+    text-decoration: none; padding: 16px 32px; border-radius: 6px;
+    transition: all 0.2s; animation: fadeUp 0.8s 0.4s ease both;
+  }
+  .cover-cta:hover {
+    background: var(--accent2); transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(59,130,246,0.3);
+  }
+
+  .cover-scroll-hint {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--text-muted); font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    animation: fadeIn 2s 1s ease both;
+  }
+  .scroll-line {
+    width: 1px; height: 48px;
+    background: linear-gradient(to bottom, transparent, var(--accent));
+    animation: scrollAnim 2s ease infinite;
+  }
+  @keyframes scrollAnim {
+    0%{transform:scaleY(0);transform-origin:top}
+    50%{transform:scaleY(1);transform-origin:top}
+    51%{transform:scaleY(1);transform-origin:bottom}
+    100%{transform:scaleY(0);transform-origin:bottom}
+  }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  .divider { height: 1px; background: var(--border); max-width: 900px; margin: 0 auto; }
+
+  /* PAGE 2 */
+  #page2 {
+    min-height: 100vh; scroll-snap-align: start;
+    padding: 120px 48px 80px; max-width: 900px; margin: 0 auto;
+  }
+
+  .section-num {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 11px;
+    letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-num::after {
+    content: ''; flex: 1; max-width: 60px; height: 1px;
+    background: var(--accent); opacity: 0.4;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(26px, 4vw, 42px);
+    line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 24px;
+  }
+  .section-title span { color: var(--accent2); }
+
+  .section-lead {
+    font-size: 17px; font-weight: 300; color: var(--text-dim);
+    max-width: 600px; margin-bottom: 48px; line-height: 1.7;
+  }
+
+  .strategy-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px;
+  }
+
+  .strategy-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; position: relative;
+    overflow: hidden; transition: border-color 0.2s, transform 0.2s;
+  }
+  .strategy-card:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-2px); }
+  .strategy-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px; background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  .card-icon {
+    width: 38px; height: 38px; border-radius: 8px;
+    background: rgba(59,130,246,0.1);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px; font-size: 17px;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 14px; margin-bottom: 8px; color: var(--text);
+  }
+  .card-body { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+  .xyz-box {
+    background: var(--surface2); border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 16px; padding: 32px; margin-bottom: 28px;
+    position: relative; overflow: hidden;
+  }
+  .xyz-box::after {
+    content: 'XYZ'; position: absolute; right: -10px; top: -20px;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 110px;
+    color: rgba(59,130,246,0.04); pointer-events: none; line-height: 1;
+  }
+  .xyz-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 6px; color: var(--accent2); }
+  .xyz-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; font-style: italic; }
+
+  .xyz-formula { display: flex; margin-bottom: 18px; border-radius: 10px; overflow: hidden; }
+  .xyz-step { flex: 1; padding: 18px 16px; text-align: center; }
+  .xyz-step:nth-child(1) { background: rgba(59,130,246,0.12); }
+  .xyz-step:nth-child(2) { background: rgba(167,139,250,0.12); }
+  .xyz-step:nth-child(3) { background: rgba(16,185,129,0.12); }
+
+  .xyz-letter { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px; margin-bottom: 4px; }
+  .xyz-step:nth-child(1) .xyz-letter { color: var(--accent2); }
+  .xyz-step:nth-child(2) .xyz-letter { color: #a78bfa; }
+  .xyz-step:nth-child(3) .xyz-letter { color: var(--green); }
+
+  .xyz-word { font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .xyz-desc { font-size: 11px; color: var(--text-muted); }
+
+  .xyz-example {
+    background: var(--bg); border-radius: 8px; padding: 14px 18px;
+    font-size: 13px; color: var(--text-dim);
+    border-left: 3px solid var(--accent); font-style: italic;
+  }
+  .xyz-example strong { color: var(--text); font-style: normal; }
+
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .comp-col { padding: 22px; border-radius: 10px; }
+  .comp-col.bad { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); }
+  .comp-col.good { background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.15); }
+  .comp-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .comp-col.bad .comp-label { color: var(--red); }
+  .comp-col.good .comp-label { color: var(--green); }
+  .comp-text { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+  /* PAGE 3 */
+  #page3 {
+    min-height: 100vh; scroll-snap-align: start;
+    padding: 120px 48px 80px; max-width: 900px; margin: 0 auto;
+  }
+
+  .prompt-block {
+    margin-bottom: 28px; border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--border); transition: border-color 0.2s;
+  }
+  .prompt-block:hover { border-color: rgba(59,130,246,0.3); }
+
+  .prompt-header {
+    background: var(--surface2); padding: 14px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .prompt-meta { display: flex; align-items: center; gap: 12px; }
+
+  .prompt-badge {
+    display: inline-block; padding: 3px 11px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .badge-1 { background: rgba(59,130,246,0.15); color: var(--accent2); }
+  .badge-2 { background: rgba(167,139,250,0.15); color: #a78bfa; }
+  .badge-3 { background: rgba(16,185,129,0.15); color: var(--green); }
+
+  .prompt-title-text {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--text);
+  }
+
+  .copy-btn {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-dim); font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500;
+    padding: 7px 15px; border-radius: 6px;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em;
+  }
+  .copy-btn:hover { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: var(--accent2); }
+  .copy-btn.copied { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: var(--green); }
+
+  .prompt-body { background: var(--surface); padding: 24px; }
+  .prompt-desc {
+    font-size: 13px; color: var(--text-muted); margin-bottom: 18px;
+    padding-bottom: 18px; border-bottom: 1px solid var(--border); line-height: 1.6;
+  }
+  .prompt-desc strong { color: var(--text-dim); font-weight: 500; }
+  .prompt-text {
+    font-family: 'Courier New', monospace; font-size: 13px;
+    color: #cbd5e1; line-height: 1.8; white-space: pre-wrap; word-break: break-word;
+  }
+
+  /* PAGE 4 */
+  #page4 {
+    min-height: 100vh; scroll-snap-align: start;
+    padding: 120px 48px 80px; max-width: 900px; margin: 0 auto;
+  }
+
+  .checklist { margin-bottom: 40px; }
+
+  .check-item {
+    display: flex; align-items: flex-start; gap: 18px;
+    padding: 22px 0; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: padding-left 0.2s;
+  }
+  .check-item:hover { padding-left: 6px; }
+  .check-item:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid rgba(59,130,246,0.4); flex-shrink: 0; margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; cursor: pointer;
+  }
+  .check-item.checked .check-box { background: var(--green); border-color: var(--green); }
+
+  .check-num {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 11px;
+    color: var(--accent); flex-shrink: 0; width: 22px; margin-top: 3px;
+  }
+  .check-content { flex: 1; }
+  .check-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px;
+    margin-bottom: 5px; transition: color 0.2s;
+  }
+  .check-item.checked .check-title { color: var(--text-muted); text-decoration: line-through; }
+  .check-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  .closing-card {
+    background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(167,139,250,0.06) 100%);
+    border: 1px solid rgba(59,130,246,0.2); border-radius: 20px;
+    padding: 44px; text-align: center; position: relative; overflow: hidden;
+  }
+  .closing-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), #a78bfa, var(--green));
+  }
+  .closing-emoji { font-size: 44px; margin-bottom: 18px; display: block; }
+  .closing-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; margin-bottom: 14px; }
+  .closing-text { font-size: 15px; color: var(--text-dim); max-width: 480px; margin: 0 auto 20px; line-height: 1.7; }
+  .closing-sig { font-size: 13px; color: var(--text-muted); font-style: italic; }
+  .closing-sig a { color: var(--accent2); text-decoration: none; }
+
+  /* PROGRESS */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), #a78bfa);
+    z-index: 200; transition: width 0.1s; width: 0%;
+  }
+
+  /* PAGE INDICATOR */
+  .page-indicator {
+    position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 10px; z-index: 100;
+  }
+  .pi-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); cursor: pointer; transition: all 0.2s;
+  }
+  .pi-dot.active { background: var(--accent2); transform: scale(1.6); }
+
+  /* TOOLTIP */
+  .tooltip {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: #000; font-size: 13px; font-weight: 600;
+    padding: 10px 20px; border-radius: 999px;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999;
+  }
+  .tooltip.show { opacity: 1; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    #page1, #page2, #page3, #page4 { padding: 90px 20px 60px; }
+    .strategy-grid { grid-template-columns: 1fr; }
+    .comparison { grid-template-columns: 1fr; }
+    .xyz-formula { flex-direction: column; }
+    .cover-stats { gap: 28px; flex-wrap: wrap; }
+    .closing-card { padding: 28px 20px; }
+    .page-indicator { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="page-indicator" id="pageIndicator">
+  <div class="pi-dot active" onclick="scrollToPage(0)"></div>
+  <div class="pi-dot" onclick="scrollToPage(1)"></div>
+  <div class="pi-dot" onclick="scrollToPage(2)"></div>
+  <div class="pi-dot" onclick="scrollToPage(3)"></div>
+</div>
+
+<nav>
+  <div class="nav-logo">CV Mühendisliği</div>
+  <ul class="nav-links">
+    <li><a href="#page1">Giriş</a></li>
+    <li><a href="#page2">Strateji</a></li>
+    <li><a href="#page3">Promptlar</a></li>
+    <li><a href="#page4">Kontrol</a></li>
+  </ul>
+</nav>
+
+<div class="cover-orb orb1"></div>
+<div class="cover-orb orb2"></div>
+
+<!-- PAGE 1 -->
+<section id="page1">
+  <div class="cover-content">
+    <div class="cover-tag">E-Kitap &middot; 2025 Edisyonu</div>
+    <h1 class="cover-title">
+      Yapay Zeka ile<br>
+      <span class="gradient-line">CV Mühendisliği</span>
+    </h1>
+    <p class="cover-subtitle">
+      <em>Sıradan adaydan, seçilen profesyonele dönüşüm.</em><br>
+      AI'yı bir daktilo değil, stratejik bir iş ortağı olarak kullanmanın eksiksiz rehberi.
+    </p>
+    <div class="cover-stats">
+      <div class="stat">
+        <div class="stat-num">3</div>
+        <div class="stat-label">Master Prompt</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">5</div>
+        <div class="stat-label">Kritik Kontrol</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">1</div>
+        <div class="stat-label">Metodoloji</div>
+      </div>
+    </div>
+    <a href="#page2" class="cover-cta">
+      Okumaya Başla
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </a>
+  </div>
+  <div class="cover-scroll-hint">
+    <span>Kaydır</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PAGE 2 -->
+<section id="page2">
+  <div class="section-num">Bölüm 01</div>
+  <h2 class="section-title">Strateji Ortağı Olarak <span>Yapay Zeka</span></h2>
+  <p class="section-lead">Çoğu aday AI'yı bir yazım aracı olarak kullanıyor. Oysa gerçek güç, onu bir strateji danışmanı gibi yönlendirmekte gizli.</p>
+
+  <div class="strategy-grid">
+    <div class="strategy-card">
+      <div class="card-icon">⌨️</div>
+      <div class="card-title">Daktilo Kullanımı</div>
+      <div class="card-body">«CV'mi yeniden yaz» demek. Çıktı: Daha iyi cümleler, ama aynı stratejik zayıflıklar. Sizi öne çıkarmaz.</div>
+    </div>
+    <div class="strategy-card">
+      <div class="card-icon">🧠</div>
+      <div class="card-title">Strateji Ortağı Kullanımı</div>
+      <div class="card-body">Rolü, sektörü, şirketi ve pozisyonu tanımlayıp AI'dan o perspektifle analiz etmesini istemek. İşte bu, fark yaratır.</div>
+    </div>
+    <div class="strategy-card">
+      <div class="card-icon">🎯</div>
+      <div class="card-title">ATS Sistemleri</div>
+      <div class="card-body">İş ilanlarının %75'i bir insan gözüne ulaşmadan eleniyor. AI, anahtar kelimeleri tespit etmede eşsiz bir araçtır.</div>
+    </div>
+    <div class="strategy-card">
+      <div class="card-icon">✦</div>
+      <div class="card-title">Kantitatif Dil</div>
+      <div class="card-body">İşe alım uzmanları rakamları görür görmez karar veriyor. «Proje yönettim» değil, «8 kişilik ekiple %30 maliyet düşürdüm.»</div>
+    </div>
+  </div>
+
+  <div class="xyz-box">
+    <div class="xyz-title">Google XYZ Metodolojisi</div>
+    <div class="xyz-sub">Google tarafından geliştirilen, etki odaklı deneyim yazım çerçevesi</div>
+    <div class="xyz-formula">
+      <div class="xyz-step">
+        <div class="xyz-letter">X</div>
+        <div class="xyz-word">Ne Yaptın</div>
+        <div class="xyz-desc">Eylem fiiliyle başla</div>
+      </div>
+      <div class="xyz-step">
+        <div class="xyz-letter">Y</div>
+        <div class="xyz-word">Nasıl Yaptın</div>
+        <div class="xyz-desc">Yöntemi açıkla</div>
+      </div>
+      <div class="xyz-step">
+        <div class="xyz-letter">Z</div>
+        <div class="xyz-word">Sonuç Ne</div>
+        <div class="xyz-desc">Ölçülebilir etki</div>
+      </div>
+    </div>
+    <div class="xyz-example">
+      <strong>Örnek:</strong> Müşteri geri bildirim sürecini <strong>[X: yeniden tasarladım]</strong>, NPS anketleri ve A/B testleri kullanarak <strong>[Y: sistematik biçimde]</strong>, müşteri memnuniyetini 6 ayda <strong>[Z: %40 artırdım]</strong>.
+    </div>
+  </div>
+
+  <div class="comparison">
+    <div class="comp-col bad">
+      <div class="comp-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        Zayıf Yazım
+      </div>
+      <div class="comp-text">«Satış ekibinde çalıştım ve müşterilerle ilgilendim. Takım çalışmasına önem veririm.»</div>
+    </div>
+    <div class="comp-col good">
+      <div class="comp-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+        XYZ Yazımı
+      </div>
+      <div class="comp-text">«5 kişilik B2B satış ekibini yöneterek çapraz-satış stratejisi uyguladım; yıllık geliri ₺2.4M artırdım.»</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PAGE 3 -->
+<section id="page3">
+  <div class="section-num">Bölüm 02</div>
+  <h2 class="section-title">3 Aşamalı <span>Master Prompt Sistemi</span></h2>
+  <p class="section-lead">Bu promptları sırasıyla kullanın. Her biri bir öncekinin üzerine inşa edilmektedir.</p>
+
+  <div class="prompt-block">
+    <div class="prompt-header">
+      <div class="prompt-meta">
+        <span class="prompt-badge badge-1">Aşama 1</span>
+        <span class="prompt-title-text">Deneyim Dönüşümü</span>
+      </div>
+      <button class="copy-btn" onclick="copyPrompt(this, 'prompt1')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Kopyala
+      </button>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-desc"><strong>Kullanım amacı:</strong> Ham deneyimlerinizi Google XYZ metodolojisiyle etki odaklı, ATS uyumlu maddelere dönüştürür. Pozisyon başına bir kez uygulayın.</div>
+      <pre class="prompt-text" id="prompt1">Sen kıdemli bir CV stratejisti ve kariyer koçusun. Görevin, ham iş deneyimlerimi güçlü, etki odaklı CV maddelerine dönüştürmek.
+
+Hedef Pozisyon: [POZİSYON ADI]
+Şirket: [ŞİRKET ADI]
+Sektör: [SEKTÖR]
+
+Ham Deneyimim:
+[Burada ne yaptığınızı kaba hatlarda yazın]
+
+Lütfen şunları yap:
+1. Google XYZ formatında yeniden yaz: "[Eylem] yaparak [nasıl] sonucunu elde ettim"
+2. Her maddeye ölçülebilir bir metrik ekle (elimde yoksa makul bir tahmin öner)
+3. Güçlü eylem fiilleri kullan (yönettim, inşa ettim, geliştirdim vb.)
+4. ATS sistemleri için sektöre özgü anahtar kelimeleri dahil et
+5. Özgün, jargonsuz bir dil kullan — klişelerden kaçın
+
+Çıktı: 3-5 maddelik bir liste, her biri max 2 satır.</pre>
+    </div>
+  </div>
+
+  <div class="prompt-block">
+    <div class="prompt-header">
+      <div class="prompt-meta">
+        <span class="prompt-badge badge-2">Aşama 2</span>
+        <span class="prompt-title-text">ATS Uyumu &amp; Anahtar Kelime Analizi</span>
+      </div>
+      <button class="copy-btn" onclick="copyPrompt(this, 'prompt2')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Kopyala
+      </button>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-desc"><strong>Kullanım amacı:</strong> İş ilanını analiz ederek CV'nizin ATS puanını yükseltir ve eksik anahtar kelimeleri tespit eder. Her başvurudan önce çalıştırın.</div>
+      <pre class="prompt-text" id="prompt2">Sen bir ATS (Applicant Tracking System) uzmanısın. Bir iş ilanını ve CV'mi analiz ederek eşleşme skorunu yükseltmeme yardım et.
+
+İŞ İLANI:
+[İş ilanının tamamını buraya yapıştır]
+
+MEVCUT CV METNİM:
+[CV'nin ilgili bölümlerini buraya yapıştır]
+
+Analizi şu formatta ver:
+
+📊 EŞLEŞME SKORU: [%0-100 arası tahmini puan]
+
+✅ GÜÇLÜ YÖNLER (ilanda olan, CV'mde de var):
+- [Liste]
+
+⚠️ EKSİK ANAHTAR KELİMELER (ilanda var, CV'mde yok):
+- [Liste + nereye eklenebileceği]
+
+🔧 ÖNERİLEN DEĞİŞİKLİKLER:
+- [Spesifik, uygulanabilir öneriler]
+
+💡 KAZANDIRICLAR (sizi öne çıkaracak 2-3 vurgu noktası):</pre>
+    </div>
+  </div>
+
+  <div class="prompt-block">
+    <div class="prompt-header">
+      <div class="prompt-meta">
+        <span class="prompt-badge badge-3">Aşama 3</span>
+        <span class="prompt-title-text">Etki Odaklı Profil Özeti</span>
+      </div>
+      <button class="copy-btn" onclick="copyPrompt(this, 'prompt3')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Kopyala
+      </button>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-desc"><strong>Kullanım amacı:</strong> İşe alım uzmanının 6 saniyede okuyacağı, sizi tam olarak doğru konumlandıran profesyonel özet yazar. Son adım olarak kullanın.</div>
+      <pre class="prompt-text" id="prompt3">Sen işe alım uzmanlarının psikolojisini anlayan bir kariyer stratejistisin. Güçlü, kişisel bir CV profil özeti yaz.
+
+Hakkımda:
+- Pozisyon: [Hedef pozisyon]
+- Toplam Deneyim: [X yıl]
+- En Büyük 3 Başarım: [Kısaca belirt]
+- Temel Güçlü Yönlerim: [2-3 beceri]
+- Neden Bu Şirkete Başvuruyorum: [Kısa motivasyon]
+
+Kurallar:
+✦ 3-4 cümle, maksimum 80 kelime
+✦ İlk cümle dikkat çekici bir etki ifadesiyle başlasın
+✦ Birinci şahıs kullanma ("Deneyimli profesyonel..." ile başla)
+✦ En az bir somut rakam veya başarı metriği dahil et
+✦ Şirketin değerleriyle veya pozisyonun gerektirdikleriyle bağlantı kur
+✦ Klişelerden kaçın: "sonuç odaklı", "ekip oyuncusu" gibi ifadeler kullanma
+
+Bana 2 farklı versiyon sun:
+1. Analitik / veri odaklı versiyon
+2. Liderlik / vizyon odaklı versiyon</pre>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PAGE 4 -->
+<section id="page4">
+  <div class="section-num">Bölüm 03</div>
+  <h2 class="section-title">Göndermeden Önce <span>5 Kritik Kontrol</span></h2>
+  <p class="section-lead">CV'nizi göndermeden önce bu listeyi tek tek işaretleyin. Her madde, bir eleniş sebebini ortadan kaldırır.</p>
+
+  <div class="checklist">
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="check-num">01</div>
+      <div class="check-content">
+        <div class="check-title">ATS Taraması Yapıldı</div>
+        <div class="check-desc">İş ilanındaki anahtar kelimelerin en az %70'i CV'de geçiyor. Tablo, grafik, özel font kullanılmadı — ATS bunları okuyamaz.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="check-num">02</div>
+      <div class="check-content">
+        <div class="check-title">Her Madde XYZ Formatında</div>
+        <div class="check-desc">Tüm deneyim maddeleri bir eylem fiiliyle başlıyor ve somut bir sonuç içeriyor. En az 3 maddede ölçülebilir rakam var.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="check-num">03</div>
+      <div class="check-content">
+        <div class="check-title">LinkedIn &amp; CV Senkronizasyonu</div>
+        <div class="check-desc">LinkedIn profilindeki unvanlar ve tarihler CV ile birebir örtüşüyor. LinkedIn URL'si kısaltılmış ve CV'ye eklenmiş.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="check-num">04</div>
+      <div class="check-content">
+        <div class="check-title">Dosya Adı ve Format Kontrolü</div>
+        <div class="check-desc">Dosya adı: <em>AdSoyad_CV_2025.pdf</em> formatında. PDF olarak kaydedildi. 1 sayfa (5 yıl altı deneyim) veya maksimum 2 sayfa.</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="check-num">05</div>
+      <div class="check-content">
+        <div class="check-title">Yabancı Göz Testi</div>
+        <div class="check-desc">CV, sizi tanımayan birine 10 saniye gösterildiğinde «ne iş yapıyor ve ne değer katıyor?» sorusuna net yanıt veriyor.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="closing-card">
+    <span class="closing-emoji">🙏</span>
+    <h3 class="closing-title">Teşekkürler &amp; İyi Şanslar</h3>
+    <p class="closing-text">
+      Bu rehberi hazırlarken seninle geçirdiğimiz stratejik oturumların her biri gerçek bir değer yarattı. Artık bu araçlara sahipsin — tutarlı biçimde uygula ve farkı kendin gör.
+    </p>
+    <p class="closing-text">
+      LinkedIn profilini de aynı prensiplerle güncellemeyi unutma. Profil özeti, deneyimler ve öne çıkan bölümler; CV'nin dijital yansıması olmalı.
+    </p>
+    <p class="closing-sig">
+      Oluşturuldu: <strong>Claude</strong> ile iş birliği içinde &middot; 2025<br>
+      Strateji değişmez, taktikler güncellenir — ama <em>senin hikâyen</em> benzersizdir.
+    </p>
+  </div>
+</section>
+
+<div class="tooltip" id="tooltip">✓ Panoya kopyalandı!</div>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const winH = document.documentElement.scrollHeight - window.innerHeight;
+    document.getElementById('progressBar').style.width = (window.scrollY / winH * 100) + '%';
+    const pages = ['page1','page2','page3','page4'];
+    const dots = document.querySelectorAll('.pi-dot');
+    const mid = window.innerHeight / 2;
+    pages.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      if (r.top <= mid && r.bottom >= mid) {
+        dots.forEach(d => d.classList.remove('active'));
+        dots[i].classList.add('active');
+      }
+    });
+  });
+
+  function scrollToPage(i) {
+    ['page1','page2','page3','page4'][i] && document.getElementById(['page1','page2','page3','page4'][i]).scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function toggleCheck(item) {
+    item.classList.toggle('checked');
+  }
+
+  function copyPrompt(btn, id) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Kopyalandı';
+      const tip = document.getElementById('tooltip');
+      tip.classList.add('show');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Kopyala';
+        tip.classList.remove('show');
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
